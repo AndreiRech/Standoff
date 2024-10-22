@@ -32,7 +32,7 @@ Siga o exemplo abaixo.
 O resultado esperado deve aparecer no terminal logo abaixo de seu input.
 
 ```bash
-    30
+    40
 ```
 
 ### PONTO A SER CONSIDERADO NA EXECUÇÃO
