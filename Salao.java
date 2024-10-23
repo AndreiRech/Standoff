@@ -20,19 +20,21 @@ public class Salao {
 
         tab = criaTabela(N);
 
-        long inicio = System.nanoTime();
+        //long inicio = System.nanoTime();
 
         posiciona(N, b, c, 0);
+        System.out.println(quantidade);
 
-        long fim = System.nanoTime();
-        double tempoSegundos = (fim - inicio) / 1e9;
+        //long fim = System.nanoTime();
+        //double tempoSegundos = (fim - inicio) / 1e9;
    
-        System.out.printf("Total de solucoes %d %d %d: %d (%.2f s)", N, b, c, quantidade, tempoSegundos);
+        //System.out.printf("Total de solucoes %d %d %d: %d (%.2f s)", N, b, c, quantidade, tempoSegundos);
     }
     
     // Posiciona os forasteiros recursivamente e caso ainda não tenha aparecido, adiciona no set
     public static void posiciona(int N, int b, int c, int pos) {
         if (b == 0 && c == 0 && validaTabela(N)) {
+            //printaMatriz();
             quantidade++;
             return;
         }
@@ -124,7 +126,7 @@ public class Salao {
 
     // --- MÉTODOS AUXILIARES ---
 
-    // Printa a matriz
+    // Printa a matriz (não é utilizado pois consome muito tempo de execução em casos maiores)
     public static void printaMatriz() {
         System.out.println("-----");
         for (int i = 0; i < tab.length; i++) {
