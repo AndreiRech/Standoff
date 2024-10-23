@@ -1,9 +1,7 @@
-import java.util.HashSet;
-
 public class Salao {
     private static char[][] tab = null;
-    private static HashSet<String> possibilidades = new HashSet<>();
-    private static boolean primeira = true;
+    private static int quantidade = 0;
+    private static int[][] direcoes = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
     
     public static void main(String[] args) {
         if (args.length <= 2) {
@@ -23,64 +21,83 @@ public class Salao {
 
         long inicio = System.nanoTime();
 
-        posiciona(N, b, c, 0, 0);
+        posiciona(N, b, c, 0);
 
         long fim = System.nanoTime();
-
         double tempoSegundos = (fim - inicio) / 1e9;
    
-        System.out.printf("Total de solucoes %d %d %d: %d (%.2f s)", N, b, c, possibilidades.size(), tempoSegundos);
+        System.out.printf("Total de solucoes %d %d %d: %d (%.2f s)", N, b, c, quantidade, tempoSegundos);
     }
     
     // Posiciona os forasteiros recursivamente e caso ainda não tenha aparecido, adiciona no set
-    public static void posiciona(int N, int b, int c, int x, int y) {
-        if(b == 0 && c == 0 && validaTabela(N)) {
-            String tabStr = matrizParaString(tab);
-            possibilidades.add(tabStr);
+    public static void posiciona(int N, int b, int c, int pos) {
+        if (b == 0 && c == 0 && validaTabela(N)) {
+            quantidade++;
+            return;
+        }
+        
+        // Verifica se a posição está fora do tabuleiro
+        if (pos >= N * N) {
             return;
         }
 
-        if(b == 0 && primeira == true) {
-            x = 0;
-            y = 0;
-            primeira = false;
-        }
+        // EX: pos = 11 & N = 4
+        // x = 2 -> passou pela linha 1 e 2 e agora está na terceira
+        // y = 3 -> passou por 10 colunas (4 + 4) e agora está na terceira casa da terceira
+        int x = pos / N;
+        int y = pos % N;
 
-        for (int i = x; i < N; i++) {
-            for (int j = (i == x ? y : 0); j < N; j++) {
-                if (tab[i][j] == '.' && b > 0 && validaRedores(N, i, j, 'b')) {
-                    primeira = true;
-                    tab[i][j] = 'b';
+        // Utilizamos essa lógica para evitar utilizar dois for's
+        if (tab[x][y] == '.') {
+            if (b > 0 && validaRedores(N, x, y, 'b')) {
+                tab[x][y] = 'b';
 
-                    posiciona(N, b-1, c, i, j+1);
-         
-                    tab[i][j] = '.';
-                }
+                posiciona(N, b - 1, c, pos + 1);
 
-                if (tab[i][j] == '.' && b == 0 && c > 0 && validaVisao(N, i, j, 'c')) {
-                    tab[i][j] = 'c';
-        
-                    posiciona(N, b, c-1, i, j+1);
-         
-                    tab[i][j] = '.';
-                }
+                tab[x][y] = '.';
+            }
+
+            if (c > 0 && validaRedores(N, x, y, 'c')) {
+                tab[x][y] = 'c';
+
+                posiciona(N, b, c - 1, pos + 1);
+
+                tab[x][y] = '.';
             }
         }
+
+        posiciona(N, b, c, pos + 1);
     }
 
     // Verifica se não há um forasteiro da mesma gangue nos 8 espaços ao redor do atual
     public static boolean validaRedores(int N, int x, int y, char tipo) {
-        int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
-        int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
+        for (int[] direcao : direcoes) {
+            int nx = x + direcao[0];
+            int ny = y + direcao[1];
     
-        for (int i = 0; i < 8; i++) {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-    
-            if (nx >= 0 && nx < N && ny >= 0 && ny < N)
+            if (nx >= 0 && nx < N && ny >= 0 && ny < N) 
                 if (tab[nx][ny] == tipo) return false;
         }   
-        
+
+        return validaOutro(N, x, y, tipo);
+    }
+    
+    public static boolean validaOutro(int N, int x, int y, char tipo) {
+        char oponente = (tipo == 'b') ? 'c' : 'b';
+
+        for (int[] direcao : direcoes) {
+            int nx = x + direcao[0], ny = y + direcao[1];
+            
+            while (nx >= 0 && nx < N && ny >= 0 && ny < N) {
+                if (tab[nx][ny] == tipo) return false;
+                if (tab[nx][ny] == oponente) {
+                    break;
+                }
+                nx += direcao[0];
+                ny += direcao[1];
+            }
+        }
+
         return true;
     }
 
@@ -88,7 +105,7 @@ public class Salao {
     public static boolean validaTabela(int N) {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
-                if (tab[i][j] == 'b' && !validaVisao(N, i, j, (tab[i][j] == 'b') ? 'b' : 'c'))
+                if (tab[i][j] != '.' && !validaVisao(N, i, j, (tab[i][j] == 'b') ? 'b' : 'c'))
                     return false;
 
         return true;
@@ -99,41 +116,24 @@ public class Salao {
         int totalInimigos = 0;
         char oponente = (tipo == 'b') ? 'c' : 'b';
 
-        int[][] direcoes = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
-
         for (int[] direcao : direcoes) {
             int nx = x + direcao[0], ny = y + direcao[1];
-            boolean encontrouInimigo = false;
             
             while (nx >= 0 && nx < N && ny >= 0 && ny < N) {
                 if (tab[nx][ny] == tipo) return false;
                 if (tab[nx][ny] == oponente) {
-                    encontrouInimigo = true;
+                    totalInimigos++;
                     break;
                 }
                 nx += direcao[0];
                 ny += direcao[1];
             }
-            
-            if (encontrouInimigo) totalInimigos++;
         }
     
         return totalInimigos >= 2;
     }
 
     // --- MÉTODOS AUXILIARES ---
-
-    // Copia a matriz para armazenar os valores e não a referência
-    public static String matrizParaString(char[][] tab) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < tab.length; i++) {
-            for (int j = 0; j < tab[i].length; j++) {
-                sb.append(tab[i][j]);
-            }
-            sb.append("\n");  // Adiciona quebra de linha para separar as linhas
-        }
-        return sb.toString();
-    }
 
     // Printa a matriz
     public static void printaMatriz(char matrix[][]) {
