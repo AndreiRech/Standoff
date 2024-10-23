@@ -4,7 +4,7 @@ public class Salao {
     private static int[][] direcoes = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
     
     public static void main(String[] args) {
-        if (args.length <= 2) {
+        if (args.length != 2) {
             System.out.println("Insira 3 argumentos.");
         }
 
@@ -37,13 +37,11 @@ public class Salao {
         }
         
         // Verifica se a posição está fora do tabuleiro
-        if (pos >= N * N) {
-            return;
-        }
+        if (pos >= N * N) return;
 
         // EX: pos = 11 & N = 4
-        // x = 2 -> passou pela linha 1 e 2 e agora está na terceira
-        // y = 3 -> passou por 10 colunas (4 + 4) e agora está na terceira casa da terceira
+        // x = 2 -> passou pela linha 0 e 1 e agora está na linha 2
+        // y = 3 -> avançou 10 casas, passando por 2 linhas (4 + 4) e agora está na coluna 3 da linha 2
         int x = pos / N;
         int y = pos % N;
 
@@ -51,17 +49,13 @@ public class Salao {
         if (tab[x][y] == '.') {
             if (b > 0 && validaRedores(N, x, y, 'b')) {
                 tab[x][y] = 'b';
-
                 posiciona(N, b - 1, c, pos + 1);
-
                 tab[x][y] = '.';
             }
 
             if (c > 0 && validaRedores(N, x, y, 'c')) {
                 tab[x][y] = 'c';
-
                 posiciona(N, b, c - 1, pos + 1);
-
                 tab[x][y] = '.';
             }
         }
@@ -72,17 +66,17 @@ public class Salao {
     // Verifica se não há um forasteiro da mesma gangue nos 8 espaços ao redor do atual
     public static boolean validaRedores(int N, int x, int y, char tipo) {
         for (int[] direcao : direcoes) {
-            int nx = x + direcao[0];
-            int ny = y + direcao[1];
+            int nx = x + direcao[0], ny = y + direcao[1];
     
-            if (nx >= 0 && nx < N && ny >= 0 && ny < N) 
-                if (tab[nx][ny] == tipo) return false;
+            if (nx >= 0 && nx < N && ny >= 0 && ny < N && tab[nx][ny] == tipo) 
+                return false;
         }   
 
-        return validaOutro(N, x, y, tipo);
+        return validaInimigos(N, x, y, tipo);
     }
     
-    public static boolean validaOutro(int N, int x, int y, char tipo) {
+    // Verifica se não há nenhum inimigo no campo de visão
+    public static boolean validaInimigos(int N, int x, int y, char tipo) {
         char oponente = (tipo == 'b') ? 'c' : 'b';
 
         for (int[] direcao : direcoes) {
@@ -90,9 +84,8 @@ public class Salao {
             
             while (nx >= 0 && nx < N && ny >= 0 && ny < N) {
                 if (tab[nx][ny] == tipo) return false;
-                if (tab[nx][ny] == oponente) {
-                    break;
-                }
+                if (tab[nx][ny] == oponente) break;
+
                 nx += direcao[0];
                 ny += direcao[1];
             }
@@ -105,7 +98,7 @@ public class Salao {
     public static boolean validaTabela(int N) {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
-                if (tab[i][j] != '.' && !validaVisao(N, i, j, (tab[i][j] == 'b') ? 'b' : 'c'))
+                if (tab[i][j] != '.' && !validaVisao(N, i, j, tab[i][j]))
                     return false;
 
         return true;
@@ -136,11 +129,11 @@ public class Salao {
     // --- MÉTODOS AUXILIARES ---
 
     // Printa a matriz
-    public static void printaMatriz(char matrix[][]) {
+    public static void printaMatriz() {
         System.out.println("-----");
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
-                System.out.print(matrix[i][j] + " ");
+        for (int i = 0; i < tab.length; i++) {
+            for (int j = 0; j < tab[i].length; j++) {
+                System.out.print(tab[i][j] + " ");
             }
             System.out.println();
         }
