@@ -1,7 +1,7 @@
 public class Salao {
     private static char[][] tab = null;
     private static int quantidade = 0;
-    private static int[][] direcoes = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
+    private static final int[][] DIRECOES = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
     
     public static void main(String[] args) {
         if (args.length != 3) {
@@ -66,21 +66,16 @@ public class Salao {
 
     // Verifica se não há um forasteiro da mesma gangue nos 8 espaços ao redor do atual
     public static boolean validaRedores(int N, int x, int y, char tipo) {
-        for (int[] direcao : direcoes) {
+        for (int[] direcao : DIRECOES) {
             int nx = x + direcao[0], ny = y + direcao[1];
     
             if (nx >= 0 && nx < N && ny >= 0 && ny < N && tab[nx][ny] == tipo) 
                 return false;
         }   
 
-        return validaInimigos(N, x, y, tipo);
-    }
-    
-    // Verifica se não há nenhum inimigo no campo de visão
-    public static boolean validaInimigos(int N, int x, int y, char tipo) {
         char oponente = (tipo == 'b') ? 'c' : 'b';
 
-        for (int[] direcao : direcoes) {
+        for (int[] direcao : DIRECOES) {
             int nx = x + direcao[0], ny = y + direcao[1];
             
             while (nx >= 0 && nx < N && ny >= 0 && ny < N) {
@@ -110,7 +105,7 @@ public class Salao {
         int totalInimigos = 0;
         char oponente = (tipo == 'b') ? 'c' : 'b';
 
-        for (int[] direcao : direcoes) {
+        for (int[] direcao : DIRECOES) {
             int nx = x + direcao[0], ny = y + direcao[1];
             
             while (nx >= 0 && nx < N && ny >= 0 && ny < N) {
