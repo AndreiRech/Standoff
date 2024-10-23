@@ -4,8 +4,9 @@ public class Salao {
     private static int[][] direcoes = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {-1,-1}, {1,-1}, {-1,1}};
     
     public static void main(String[] args) {
-        if (args.length != 2) {
+        if (args.length != 3) {
             System.out.println("Insira 3 argumentos.");
+            return;
         }
 
         int N = Integer.parseInt(args[0]);
